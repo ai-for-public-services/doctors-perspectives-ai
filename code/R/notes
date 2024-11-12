@@ -1,0 +1,160 @@
+Notes for Report
+1. Table of demographics - weighted versus not weighted - (also add statistics for frequency)
+2. Figures for impact/perception/optimism questions for all (weighted perhaps) 
+3. Figures for understanding for generative vesus ddss users.
+4. Regression results for demographics for questions and AI_use
+5. Methodology for interview sample selection - explanation
+
+In general it becomes one table, two figures and five regression groups:
+  AI_use, optimism, perception, Responsibility, understanding
+  
+
+ways to consider weighting and deal with missing variables
+1. NAs imputation in the dataset:
+  - conditional mean or mode of the group  
+  - Random sampling from the group of related variables 
+  - imputation with multinomial regression 
+  - whether to impute more than missing values or 
+2. weight imputation
+ - By regression based on variables which is not missing. 
+3. imputation for records which is not available in the dataset. 
+ - Should I impute dependent variables? wait for response from Javier
+ 
+parallel assumption test for logistic regressions. 
+1. I should do frequency of sample before imputation in the table. 
+2. Update the questions and also the sum to be 100. 
+
+Weighting resource:
+https://sdaza.com/blog/2012/raking/
+1. does weighting should be done after imputing NAs
+2. what is KNN and is it a good method od imputing? 
+
+- I got interested to check different speciality groups in the GMC website - done. 
+- check statistics after new weighting - done roughly - I can add it to the file of table stats. 
+- Do we have a roadmap of what's going on in the whole survey and document? 
+
+ 
+Firstly, just to double check we are only including doctors who are registered with a license to practise under ‘license’ tab, and excluding anyone with a temporary registered from ‘registration type’ tab:
+ImageImage
+ 
+This leaves 322,979 total licensed doctors as of today when I accessed data explorer: Summary - GDE (gmc-uk.org)
+ 
+It’s fairly straightforward to cut the data by gender, PMQ world region, age bands using the ‘show by’ function.
+ 
+Register group (i.e. GP, Specialist, Trainee or SAS/LE) is a little more tricky. You can no longer select SAS/LE as a group on data explorer, but they are essentially any doctor on neither the GP or Specialist register and not in training. There is no way of separating SAS and LE through our register data so we will need to treat them as a combined SAS/LE group for the purposes of weighting.
+ 
+You can isolate the different register groups using the tabs in the sidebar. To isolate current SAS/LE doctors, you need to select no on the ‘current specialist’ tab, no on the ‘current GP’ tab and no on the ‘trainee’ tab, like this:
+Image
+ 
+Attached I have pulled the numbers from today for the different groups we intend to weight by – Is this all you need for the weighting? Feel free to have a look for yourself on data explorer of course. Please bear in mind that register groups will total more than the total number of licensed doctors as some doctors are on both the GP and specialist register, some are on the GP register and in training, some are on the specialist register and in training, and there are even a small number of doctors on the GP register, the specialist register, and in training!
+ 
+To do:
+1. Details of AI systems used- done
+2. Rounding questions to sum to 100.  - done
+
+Notes:
+1. correlation for impact and perception questions - done 
+2. difference between frequency of DDSS and gen 
+2. Regressions.
+3. differences. 
+
+
+Weighting
+We agreed to use techniques for imputing missing data.
+I have looked at the communications we sent to the doctors in the sample prior to the research commencing. Unfortunately we are not in a position share the row by row data for demographic fields needed for propensity weighting techniques. Therefore, we will need go with the fall-back option of using a raking weighting technique using the population data already provided.
+Regressions
+Saba to provide ‘goodness of fit’ measures available for the regressions that have been run.
+Saba to provide details on the menu of variables included in the initial models and steps for exclusion/refinement.
+Saba to provide data on whether the parallel lines assumption is being held for regressions that have been run. Where parallel lines assumptions has been broken, Javier suggested partial proportionate odds model as an alternative (packages available in Stata but potentially on R now also). This offers a way to automatically relax assumptions for particular variables, which results in different boundaries. This will result in multiple coefficients for each independent variable - while this will create more complex tables and reporting, in most cases we should still be able to boil this down to something that is straightforward to communicate and interpret.
+
+
+Model tests for logistic regression:
+Null deviance: -2*Ln(L(P)) - p: The probability of being 1 based on the y - a priori
+Residual deviance:  -2 * Log Likelihood(model)
+AIC = 2*k + Residual Deviance - penalizes for number of parameters in the model. 
+
+hoslem test looks good -A high p-value (> 0.05) indicates that the model fits the data well, while a low p-value (≤ 0.05) suggests a poor fit - This test looks good - It groups data into categories usually 10
+R2_McFadden <- 1 - (logLik_model / logLik_null)
+R2_CoxSnell <- 1 - exp((2 / n) * (logLik_null - logLik_model))
+R2_Nagelkerke: R2_CoxSnell / (1 - exp((2 / n) * logLik_null))
+Nagelkerke's R-squared: Adjusts Cox and Snell's R-squared to cover the full range from 0 to 1
+
+
+Deviance and Likelihood Ratio Test - 
+A low p-value (typically < 0.05) indicates that the predictors significantly improve the model fit 
+which means the null hypothesis is rejected, suggesting significant difference between model and null model
+anova(null_model, model, test = "Chisq")
+
+Good source: 
+  http://www.medicine.mcgill.ca/epidemiology/joseph/courses/epib-621/logfit.pdf
+
+To do: 
+- ordinal logistic regression tests
+- logistic regression interpretation - done
+- Should I impute NAs for speciality ? 
+
+Questions and to do:
+- I think it is good to add AI use by charactristics - 
+- I also imputed NAs for speciality but I don't think it differs at the end. 
+- Also add interpretation by marginal effect
+- how averages are calculated and how is it different from what I calculated? 
+- Parallel assumption logistic regression
+- marginal effects and interpretation of results for logit regression
+
+
+Where parallel assumption may not hold
+- perception_6 - registration status and medical_area_medicine, Paediatrics,Psychiatry,Emergency Medicine   gender, LED_SA
+- perction_5 - LED_SAS, gender
+- perception_4 - gender
+- perception_3,2 - age_50+
+- understanding_2 - pmq_uk
+- understanding_4 - pmq_uk
+- understanding_5 - Trainee, Medicine
+- Understanding_ 8- pmq_uk, pmq_IMG
+- Responsibility_3 - pmq_IMG
+- Responsibility_1 - pmq_Emergency_Medicine
+- optimism - gender
+
+I ran brant and found that gender, speciality and reg_status is don't hold the parralel assumption
+Then, I used vglm and got the likelihood ratio test to see if my model is good. 
+
+I changed questions to 3 levels of -1,0,1
+For understanding questions,ai_consulted and ai_decision_making is not perfect -
+for ai_decision_making it is due to LED_SAS - reg_status
+for ai_decision_making, it is not clear but I can check if I remove reg_status the issue is resolved!
+No, reg_status is not effective. How about pmq?
+consulted and decision_making - pmq would suffice
+ai_use_concern and ai_use_explain: medical_area
+
+pmq and LED_SAS, Trainee are better to be considered seperate for clear_outputs, consulted, productivity and decision_making
+
+all medcical_area for aiuse_concerns. 
+aiuse_explain: ??? Radiology. 
+
+aiuse_consulted, aiuse_decision_making
+
+Questions to ask Francis tomorrow 
+NA for Specility group - should I impute it? Is it comparable to GMC? go over table_1 with Francis. 
+Ask Francis about how to report table of regression in the report- 
+Go over the document to see if I need to change anything. 
+
+Share the table with Francis. How? I can add different models to a worksheet and then say which one I chose based on which metric - done. 
+Do the same for questions. need more investigation?
+why AIC of the model is like this? - solved
+
+clean the Regressions with the same way for ordered logistic regressions and share it with Francis. 
+
+Parralel assumption tests:
+Brant is the best one. 
+
+The Brant test is designed to assess the proportional odds assumption in ordinal logistic regression models. 
+The steps:
+1. An ordinal logistic regression model is fit using the entire dataset. This involves estimating the coefficients assuming that the proportional odds assumption holds.
+
+2. For each level j of the ordinal outcome variable, separate binary logistic regression models are fit. Each of these models compares the probability of the outcome being at or below level j versus above level j.
+
+3. The coefficients from the binary logistic regression models are compared to the coefficients from the full ordinal logistic regression model.
+
+4. The Brant test statistic is calculated by comparing the log-likelihoods of the separate binary logistic models to the log-likelihood of the full ordinal logistic regression model. Specifically, the test examines whether the coefficients for each predictor are equal across the different binary logistic models.
+
+
